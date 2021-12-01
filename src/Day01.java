@@ -1,25 +1,23 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayDeque;
-import java.util.List;
 
 public class Day01 {
     public static void main(String[] args) throws IOException {
         var numbers = Files.readAllLines(Paths.get("input01.txt"))
             .stream()
-            .map(Integer::parseInt)
-            .toList();
+            .mapToInt(Integer::parseInt)
+            .toArray();
 
         part01(numbers);
         part02(numbers);
     }
 
-    private static void part01(List<Integer> numbers) {
+    private static void part01(int[] numbers) {
         var increases = 0;
-        var previous = numbers.get(0);
-        for (int i = 1; i < numbers.size(); i++) {
-            var current = numbers.get(i);
+        var previous = numbers[0];
+        for (int i = 1; i < numbers.length; i++) {
+            var current = numbers[i];
             if (current > previous) {
                 increases++;
             }
@@ -28,14 +26,14 @@ public class Day01 {
         System.out.println(increases);
     }
 
-    private static void part02(List<Integer> numbers) {
-        var queue = new ArrayDeque<>(numbers);
-        int a = queue.poll();
-        int b = queue.poll();
-        int c = queue.poll();
+    private static void part02(int[] numbers) {
+        int i = 0;
+        int a = numbers[i++];
+        int b = numbers[i++];
+        int c = numbers[i++];
         int increases = 0;
-        while (!queue.isEmpty()) {
-            var currentNum = queue.poll();
+        while (i < numbers.length) {
+            var currentNum = numbers[i++];
             var lastSum = a + b + c;
             var currentSum = b + c + currentNum;
 
