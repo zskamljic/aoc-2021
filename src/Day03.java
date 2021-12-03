@@ -8,7 +8,7 @@ public class Day03 {
     public static void main(String[] args) throws IOException {
         var input = Files.readAllLines(Paths.get("input03.txt"));
 
-        var onesCounts = countOnes(input, 0);
+        var onesCounts = countOnes(input, 0, input.get(0).length());
 
         part01(onesCounts, input);
         part02(onesCounts, input);
@@ -44,10 +44,10 @@ public class Day03 {
         System.out.println(oxygen * co2);
     }
 
-    private static int[] countOnes(List<String> input, int startIndex) {
-        var onesCounts = new int[input.get(0).length() - startIndex];
+    private static int[] countOnes(List<String> input, int startIndex, int length) {
+        var onesCounts = new int[length];
         for (var line : input) {
-            for (int i = startIndex; i < line.length(); i++) {
+            for (int i = startIndex; i < startIndex + length; i++) {
                 if (line.charAt(i) == '1') {
                     onesCounts[i - startIndex]++;
                 }
@@ -61,7 +61,7 @@ public class Day03 {
         var falseChar = keepOnes ? '0' : '1';
         int start = 1;
         while (input.size() > 1) {
-            var ones = countOnes(input, start);
+            var ones = countOnes(input, start, 1);
             var filterChar = ones[0] >= input.size() / 2f ? trueChar : falseChar;
             int finalStart = start;
             input = input.stream()
