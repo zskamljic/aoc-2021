@@ -6,7 +6,6 @@ import java.util.function.IntFunction;
 
 public class Day07 {
     public static void main(String[] args) throws IOException {
-        var input2 = "16,1,2,0,4,2,7,1,2,14";
         var input = Files.readString(Paths.get("input07.txt")).trim();
 
         var positions = Arrays.stream(input.split(","))
