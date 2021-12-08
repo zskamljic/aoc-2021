@@ -3,30 +3,20 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Day08 {
-    private static final String FULL_7_SEGMENT = "abcdefg";
-
     public static void main(String[] args) throws IOException {
-        var input = Arrays.stream("""
-                be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
-                edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc
-                fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg
-                fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega | efabcd cedba gadfec cb
-                aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga | gecf egdcabf bgf bfgea
-                fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf | gebdcfa ecba ca fadegcb
-                dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf | cefg dcbef fcge gbcadfe
-                bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd | ed bcgafe cdgba cbgef
-                egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb
-                gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
-                """.split("\n"))
-            .toList();
-        var input2 = Files.readAllLines(Paths.get("input08.txt"));
+        var input = Files.readAllLines(Paths.get("input08.txt"));
 
         part01(input);
-        decode("acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf");
+        part02(input);
     }
 
     private static void part01(List<String> input) {
@@ -45,41 +35,83 @@ public class Day08 {
         System.out.println(simpleCount);
     }
 
-    private static void decode(String line) {
-        var numbers = Arrays.stream(line.replace("| ", "").split("\s"))
-            .map(String::toCharArray)
-            .peek(chars -> Arrays.sort(chars, 0, chars.length))
-            .map(String::new)
-            .collect(Collectors.toCollection(ArrayList::new));
-
-        var number1 = filterLength(numbers, 2);
-        var number4 = filterLength(numbers, 4);
-        var number7 = filterLength(numbers, 3);
-        var number8 = filterLength(numbers, 7);
-
-        var number6 = numbers.stream()
-            .filter(s -> s.length() == 6)
-            .filter(s -> !s.contains(number1))
-            .findFirst()
-            .orElseThrow();
-        numbers.remove(number6);
-
-        var number9 = numbers.stream()
-            .filter(s -> s.length() == 6)
-            .filter(s -> s.contains(number4))
-            .findFirst()
-            .orElseThrow();
-        numbers.remove(number9);
-
-        System.out.println(number9);
+    private static void part02(List<String> input) {
+        var sum = input.stream()
+            .mapToInt(Day08::decode)
+            .sum();
+        System.out.println(sum);
     }
 
-    private static String filterLength(List<String> numbers, int length) {
+    private static int decode(String line) {
+        var numbers = Arrays.stream(line.replace("| ", "").split("\s"))
+            .map(Day08::stringToSet)
+            .collect(Collectors.toCollection(HashSet::new));
+
+        // Unambiguous
+        var number1 = filterLength(numbers, 2).get(0);
+        var number4 = filterLength(numbers, 4).get(0);
+        var number7 = filterLength(numbers, 3).get(0);
+        var number8 = filterLength(numbers, 7).get(0);
+
+        var numbers690 = filterLength(numbers, 6);
+        // Only one that doesn't have the vertical line
+        var number6 = fetchAndRemove(numbers690, s -> !s.containsAll(number1));
+
+        // 4 has the bar in the middle, that zero doesn't
+        var number9 = fetchAndRemove(numbers690, s -> s.containsAll(number4));
+        var number0 = numbers690.get(0);
+
+        // Only one remaining that has vertical line
+        var number3 = fetchAndRemove(numbers, s -> s.containsAll(number1));
+        // 5 fits into 6
+        var number5 = fetchAndRemove(numbers, number6::containsAll);
+        // Last one left
+        var number2 = fetchAndRemove(numbers, s -> true);
+
+        var solutions = Map.of(
+            number0, 0,
+            number1, 1,
+            number2, 2,
+            number3, 3,
+            number4, 4,
+            number5, 5,
+            number6, 6,
+            number7, 7,
+            number8, 8,
+            number9, 9
+        );
+
+        var solutionNumbers = line.split(" \\| ")[1];
+        var solution = Arrays.stream(solutionNumbers.split("\\s"))
+            .map(Day08::stringToSet)
+            .mapToInt(solutions::get)
+            .toArray();
+        var value = 0;
+        for (var item : solution) {
+            value *= 10;
+            value += item;
+        }
+        return value;
+    }
+
+    private static Set<Character> stringToSet(String s) {
+        return s.chars().mapToObj(i -> (char) i).collect(Collectors.toSet());
+    }
+
+    private static List<Set<Character>> filterLength(Collection<Set<Character>> numbers, int length) {
         var value = numbers.stream()
-            .filter(s -> s.length() == length)
+            .filter(s -> s.size() == length)
+            .collect(Collectors.toCollection(ArrayList::new));
+        numbers.removeAll(value);
+        return value;
+    }
+
+    private static Set<Character> fetchAndRemove(Collection<Set<Character>> numbers, Predicate<Set<Character>> predicate) {
+        var item = numbers.stream()
+            .filter(predicate)
             .findFirst()
             .orElseThrow();
-        numbers.remove(value);
-        return value;
+        numbers.remove(item);
+        return item;
     }
 }
