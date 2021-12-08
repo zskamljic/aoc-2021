@@ -1,10 +1,14 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Day08 {
+    private static final String FULL_7_SEGMENT = "abcdefg";
+
     public static void main(String[] args) throws IOException {
         var input = Arrays.stream("""
                 be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
@@ -42,9 +46,40 @@ public class Day08 {
     }
 
     private static void decode(String line) {
-        var numbers = line.replace("| ", "")
-            .split("\s");
+        var numbers = Arrays.stream(line.replace("| ", "").split("\s"))
+            .map(String::toCharArray)
+            .peek(chars -> Arrays.sort(chars, 0, chars.length))
+            .map(String::new)
+            .collect(Collectors.toCollection(ArrayList::new));
 
+        var number1 = filterLength(numbers, 2);
+        var number4 = filterLength(numbers, 4);
+        var number7 = filterLength(numbers, 3);
+        var number8 = filterLength(numbers, 7);
 
+        var number6 = numbers.stream()
+            .filter(s -> s.length() == 6)
+            .filter(s -> !s.contains(number1))
+            .findFirst()
+            .orElseThrow();
+        numbers.remove(number6);
+
+        var number9 = numbers.stream()
+            .filter(s -> s.length() == 6)
+            .filter(s -> s.contains(number4))
+            .findFirst()
+            .orElseThrow();
+        numbers.remove(number9);
+
+        System.out.println(number9);
+    }
+
+    private static String filterLength(List<String> numbers, int length) {
+        var value = numbers.stream()
+            .filter(s -> s.length() == length)
+            .findFirst()
+            .orElseThrow();
+        numbers.remove(value);
+        return value;
     }
 }
