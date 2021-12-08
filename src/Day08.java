@@ -21,7 +21,8 @@ public class Day08 {
             .toList();
         var input2 = Files.readAllLines(Paths.get("input08.txt"));
 
-        part01(input2);
+        part01(input);
+        decode("acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf");
     }
 
     private static void part01(List<String> input) {
@@ -38,5 +39,12 @@ public class Day08 {
             }
         }
         System.out.println(simpleCount);
+    }
+
+    private static void decode(String line) {
+        var numbers = line.replace("| ", "")
+            .split("\s");
+
+
     }
 }
