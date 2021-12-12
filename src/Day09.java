@@ -16,9 +16,7 @@ public class Day09 {
         for (int j = 0; j < map[0].length; j++) {
             for (int i = 0; i < map.length; i++) {
                 map[i][j] = input.get(j).charAt(i) - '0';
-                System.out.print(map[i][j]);
             }
-            System.out.println();
         }
 
         var minimums = part01(map);
